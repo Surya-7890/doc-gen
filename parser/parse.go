@@ -1,3 +1,4 @@
 package parser
 
-func ParseFiles() {}
+// gets current path and gets all files
+func GetAllFiles() {}

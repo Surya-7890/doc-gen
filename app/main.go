@@ -1,16 +1,10 @@
 package app
 
-import (
-	"gen-doc/cli"
-)
-
 type IApplication interface {
 	Init() *Application
 }
 
-type Application struct {
-	Cli *cli.CLI
-}
+type Application struct{}
 
 func Init() *Application {
 	return &Application{}
