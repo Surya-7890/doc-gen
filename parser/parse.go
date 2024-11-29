@@ -2,9 +2,14 @@ package parser
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sync"
 )
 
@@ -52,15 +57,63 @@ func (p *Parser) Parse() {
 
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
-			p.parseSingleFile(val.Name(), wg)
+			p.ParseSingleFile(val.Name()) // pass wg as second param
 		}(wg)
 	}
 	wg.Wait()
-
 }
 
 // gets filename as parameter
 // *ast.File is then traversed
-func (p *Parser) parseSingleFile(file_name string, wg *sync.WaitGroup) {
+func (p *Parser) ParseSingleFile(file_name string) { // accept wg as second param
+	file_set := token.NewFileSet()
 
+	file, err := parser.ParseFile(file_set, file_name, nil, parser.AllErrors)
+	if err != nil {
+		err_message := fmt.Sprintf("error while parsing file(%s): %s", file_name, err.Error())
+		p.Log.Fatal(err_message)
+	}
+
+	ast.Inspect(file, func(n ast.Node) bool {
+		if n == nil {
+			return false
+		}
+
+		fn, ok := n.(*ast.FuncDecl)
+		if !ok {
+			return true
+		}
+
+		if !p.isRouteHandler(fn) {
+			return true
+		}
+
+		return true
+	})
+
+	// wg.Done()
+}
+
+// checks if a function is a route handler
+// reads the params to verify
+// route handlers look like: HandlerName(res http.ResponseWriter, req *http.Request)
+func (p *Parser) isRouteHandler(fn *ast.FuncDecl) bool {
+
+	params := fn.Type.Params.List
+	if len(params) != 2 {
+		return false
+	}
+
+	res_type := reflect.TypeOf(params[0])
+	req_type := reflect.TypeOf(params[1])
+
+	if !res_type.Implements(reflect.TypeOf((http.ResponseWriter)(nil)).Elem()) {
+		return false
+	}
+
+	if req_type.Kind() != reflect.TypeOf(&http.Request{}).Kind() {
+		return false
+	}
+
+	return true
 }
