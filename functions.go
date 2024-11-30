@@ -1,11 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
 type Response struct{}
 
 type Request struct{}
 
-func Hello(res Response, req *Request) {
+func Hello(res http.ResponseWriter, req Request) {
 	fmt.Println(req, res)
 }

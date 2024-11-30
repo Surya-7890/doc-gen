@@ -4,7 +4,9 @@ type IApplication interface {
 	Init() *Application
 }
 
-type Application struct{}
+type Application struct {
+	IApplication
+}
 
 func Init() *Application {
 	return &Application{}

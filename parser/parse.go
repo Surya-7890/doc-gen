@@ -6,10 +6,8 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"sync"
 )
 
@@ -19,6 +17,7 @@ type IParser interface {
 }
 
 type Parser struct {
+	IParser
 	Log *log.Logger
 }
 
@@ -85,8 +84,13 @@ func (p *Parser) ParseSingleFile(file_name string) { // accept wg as second para
 		}
 
 		if !p.isRouteHandler(fn) {
+			messaage := fmt.Sprintf("function %s is not a route handler", fn.Name.Name)
+			p.Log.Println(messaage)
 			return true
 		}
+
+		message := fmt.Sprintf("%s is a route handler", fn.Name.Name)
+		p.Log.Println(message)
 
 		return true
 	})
@@ -104,16 +108,36 @@ func (p *Parser) isRouteHandler(fn *ast.FuncDecl) bool {
 		return false
 	}
 
-	res_type := reflect.TypeOf(params[0])
-	req_type := reflect.TypeOf(params[1])
+	fmt.Println("1", params[0].Type)
 
-	if !res_type.Implements(reflect.TypeOf((http.ResponseWriter)(nil)).Elem()) {
+	switch t := params[0].Type.(type) {
+	case *ast.SelectorExpr:
+		if x, ok := t.X.(*ast.Ident); ok && x.Name == "http" && t.Sel.Name == "ResponseWriter" {
+			p.Log.Println("First Parameter is http.ResponseWriter")
+		}
+	default:
 		return false
 	}
 
-	if req_type.Kind() != reflect.TypeOf(&http.Request{}).Kind() {
+	switch t := params[1].Type.(type) {
+	case *ast.StarExpr:
+		val, ok := t.X.(*ast.SelectorExpr)
+		if !ok {
+			return false
+		}
+
+		if x, ok := val.X.(*ast.Ident); ok && x.Name == "http" && val.Sel.Name == "Request" {
+			p.Log.Println("Second Parameter is *http.Request")
+			return true
+		}
+
+		return false
+	default:
 		return false
 	}
-
-	return true
 }
+
+// searches route handler body for req.Body unmarshalling
+// gets the type of req.Body
+// generates json based on those parameters
+func (p *Parser) generateSwaggerJSON() {}
