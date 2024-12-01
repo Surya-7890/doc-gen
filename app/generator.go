@@ -1,4 +1,4 @@
-package parser
+package app
 
 // searches route handler body for req.Body unmarshalling
 // gets the type of req.Body

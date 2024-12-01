@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"gen-doc/parser"
+	"gen-doc/app"
 	"log"
 	"os"
 	"testing"
@@ -10,9 +10,9 @@ import (
 
 func TestParseSingleFile(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := parser.NewParser(logger)
+	Parser := app.NewParser(logger)
 
-	Parser.ParseSingleFile("./functions.go")
+	Parser.ParseSingleFile("./functions.go", nil)
 
 	for val := range Parser.ParsedFileChan {
 		if val == nil || len(val) == 0 {
@@ -29,9 +29,16 @@ func TestParseSingleFile(t *testing.T) {
 
 func TestParseDir(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := parser.NewParser(logger)
+	Parser := app.NewParser(logger)
 
-	files, err := Parser.ParseDir()
+	// get the current working directory for parsing
+	dir_name, err := os.Getwd()
+	if err != nil {
+		err_message := fmt.Sprintf("error while getting current working directory: %s", err.Error())
+		Parser.Log.Println(err_message)
+	}
+
+	files, err := Parser.ParseDir(dir_name)
 	if err != nil || len(files) == 0 {
 		t.FailNow()
 	}

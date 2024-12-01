@@ -1,4 +1,4 @@
-package parser
+package app
 
 import (
 	"fmt"
@@ -25,8 +25,9 @@ func (p *Parser) Traverse(file *ast.File) []*ast.FuncDecl {
 
 		message := fmt.Sprintf("%s is a route handler", fn.Name.Name)
 		p.Log.Println(message)
-
-		arr = append(arr, fn)
+		if fn != nil {
+			arr = append(arr, fn)
+		}
 
 		return true
 	})
