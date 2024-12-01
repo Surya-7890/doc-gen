@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"go/ast"
 )
 
@@ -18,13 +17,9 @@ func (p *Parser) Traverse(file *ast.File) []*ast.FuncDecl {
 		}
 
 		if !p.IsRouteHandler(fn) {
-			messaage := fmt.Sprintf("function %s is not a route handler", fn.Name.Name)
-			p.Log.Println(messaage)
 			return true
 		}
 
-		message := fmt.Sprintf("%s is a route handler", fn.Name.Name)
-		p.Log.Println(message)
 		if fn != nil {
 			arr = append(arr, fn)
 		}

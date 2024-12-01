@@ -10,4 +10,6 @@ func IncorrectNoOfParams(res string) {}
 
 func IncorrectSecondParam(res http.ResponseWriter, req string) {}
 
+// @method GET
+// @path /login
 func RouteHandler(res http.ResponseWriter, req *http.Request) {}

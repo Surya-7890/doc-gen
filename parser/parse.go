@@ -28,7 +28,8 @@ func NewParser(logger *log.Logger) *Parser {
 		Log:            logger,
 		ParsedFileChan: make(chan []*ast.FuncDecl, 15),
 	}
-	gen.NewGenerator(parser.ParsedFileChan)
+	generator := gen.NewGenerator(parser.ParsedFileChan)
+	go generator.WaitForFiles()
 	return parser
 }
 
@@ -50,13 +51,11 @@ func (p *Parser) Parse() {
 		return
 	}
 
-	fmt.Println(files)
-
 	wg := &sync.WaitGroup{}
 	for _, val := range files {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
-			p.ParseSingleFile(val, wg) // pass wg as second param
+			p.ParseSingleFile(val, wg)
 		}(wg)
 	}
 	wg.Wait()
@@ -68,14 +67,13 @@ func (p *Parser) Parse() {
 func (p *Parser) ParseSingleFile(file_name string, wg *sync.WaitGroup) {
 	file_set := token.NewFileSet()
 
-	file, err := parser.ParseFile(file_set, file_name, nil, parser.AllErrors)
+	file, err := parser.ParseFile(file_set, file_name, nil, parser.ParseComments)
 	if err != nil {
 		err_message := fmt.Sprintf("error while parsing file(%s): %s", file_name, err.Error())
 		p.Log.Fatal(err_message)
 	}
 
 	arr := p.Traverse(file)
-	fmt.Println(arr)
 
 	p.ParsedFileChan <- arr
 
