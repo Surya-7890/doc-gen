@@ -5,25 +5,30 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 type IParser interface {
-	Parse()
+	Parse() error
 	ParseSingleFile(file_name string)
+	IsRouteHandler(*ast.FuncDecl) bool
 }
 
 type Parser struct {
 	IParser
-	Log *log.Logger
+	Log            *log.Logger
+	ParsedFileChan chan []*ast.FuncDecl
 }
 
 func NewParser(logger *log.Logger) *Parser {
 	return &Parser{
-		Log: logger,
+		Log:            logger,
+		ParsedFileChan: make(chan []*ast.FuncDecl, 15),
 	}
 }
 
@@ -31,19 +36,10 @@ func NewParser(logger *log.Logger) *Parser {
 // the map contains filename as key and *ast.File as value
 func (p *Parser) Parse() {
 
-	// get the current working directory for parsing
-	dir_name, err := os.Getwd()
+	files, err := p.ParseDir()
 	if err != nil {
-		err_message := fmt.Sprintf("error while getting current working directory: %s", err.Error())
-		p.Log.Fatal(err_message)
-	}
-
-	// returns a list of all files and folders in cwd
-	// parse all files in the directory
-	files, err := os.ReadDir(dir_name)
-	if err != nil {
-		err_message := fmt.Sprintf("error while parsing directory (%s): %s", dir_name, err.Error())
-		p.Log.Fatal(err_message)
+		p.Log.Println(err.Error())
+		return
 	}
 
 	wg := &sync.WaitGroup{}
@@ -62,6 +58,26 @@ func (p *Parser) Parse() {
 	wg.Wait()
 }
 
+func (p *Parser) ParseDir() ([]fs.DirEntry, error) {
+	// get the current working directory for parsing
+	dir_name, err := os.Getwd()
+	if err != nil {
+		err_message := fmt.Sprintf("error while getting current working directory: %s", err.Error())
+		p.Log.Println(err_message)
+		return nil, err
+	}
+
+	// returns a list of all files and folders in cwd
+	// parse all files in the directory
+	files, err := os.ReadDir(dir_name)
+	if err != nil {
+		err_message := fmt.Sprintf("error while parsing directory (%s): %s", dir_name, err.Error())
+		p.Log.Println(err_message)
+		return nil, err
+	}
+	return files, nil
+}
+
 // gets filename as parameter
 // *ast.File is then traversed
 func (p *Parser) ParseSingleFile(file_name string) { // accept wg as second param
@@ -73,27 +89,11 @@ func (p *Parser) ParseSingleFile(file_name string) { // accept wg as second para
 		p.Log.Fatal(err_message)
 	}
 
-	ast.Inspect(file, func(n ast.Node) bool {
-		if n == nil {
-			return false
-		}
+	arr := p.Traverse(file)
 
-		fn, ok := n.(*ast.FuncDecl)
-		if !ok {
-			return true
-		}
-
-		if !p.isRouteHandler(fn) {
-			messaage := fmt.Sprintf("function %s is not a route handler", fn.Name.Name)
-			p.Log.Println(messaage)
-			return true
-		}
-
-		message := fmt.Sprintf("%s is a route handler", fn.Name.Name)
-		p.Log.Println(message)
-
-		return true
-	})
+	p.ParsedFileChan <- arr
+	time.Sleep(2 * time.Second)
+	close(p.ParsedFileChan)
 
 	// wg.Done()
 }
@@ -101,19 +101,18 @@ func (p *Parser) ParseSingleFile(file_name string) { // accept wg as second para
 // checks if a function is a route handler
 // reads the params to verify
 // route handlers look like: HandlerName(res http.ResponseWriter, req *http.Request)
-func (p *Parser) isRouteHandler(fn *ast.FuncDecl) bool {
+func (p *Parser) IsRouteHandler(fn *ast.FuncDecl) bool {
 
 	params := fn.Type.Params.List
 	if len(params) != 2 {
 		return false
 	}
 
-	fmt.Println("1", params[0].Type)
-
 	switch t := params[0].Type.(type) {
 	case *ast.SelectorExpr:
-		if x, ok := t.X.(*ast.Ident); ok && x.Name == "http" && t.Sel.Name == "ResponseWriter" {
-			p.Log.Println("First Parameter is http.ResponseWriter")
+		x, ok := t.X.(*ast.Ident)
+		if !ok || x.Name != "http" || t.Sel.Name != "ResponseWriter" {
+			return false
 		}
 	default:
 		return false
@@ -127,7 +126,6 @@ func (p *Parser) isRouteHandler(fn *ast.FuncDecl) bool {
 		}
 
 		if x, ok := val.X.(*ast.Ident); ok && x.Name == "http" && val.Sel.Name == "Request" {
-			p.Log.Println("Second Parameter is *http.Request")
 			return true
 		}
 
@@ -136,8 +134,3 @@ func (p *Parser) isRouteHandler(fn *ast.FuncDecl) bool {
 		return false
 	}
 }
-
-// searches route handler body for req.Body unmarshalling
-// gets the type of req.Body
-// generates json based on those parameters
-func (p *Parser) generateSwaggerJSON() {}
