@@ -1,4 +1,4 @@
-package app
+package parser
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 func (p *Parser) Traverse(file *ast.File) []*ast.FuncDecl {
-	arr := make([]*ast.FuncDecl, 10)
+	arr := []*ast.FuncDecl{}
 	ast.Inspect(file, func(n ast.Node) bool {
 		if n == nil {
 			return false

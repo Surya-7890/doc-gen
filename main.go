@@ -1,14 +1,14 @@
 package main
 
 import (
-	"gen-doc/app"
+	"gen-doc/parser"
 	"log"
 	"os"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := app.NewParser(logger)
+	Parser := parser.NewParser(logger)
 
 	Parser.Parse()
 }

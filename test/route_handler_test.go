@@ -1,7 +1,7 @@
 package test
 
 import (
-	"gen-doc/app"
+	"gen-doc/parser"
 	"log"
 	"os"
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestRouteHandler(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := app.NewParser(logger)
+	Parser := parser.NewParser(logger)
 
 	fn, ok := Map["RouteHandler"]
 	if !ok {
@@ -25,7 +25,7 @@ func TestRouteHandler(t *testing.T) {
 
 func TestIncorrectParams(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := app.NewParser(logger)
+	Parser := parser.NewParser(logger)
 
 	fn, ok := Map["IncorrectParams"]
 	if !ok {
@@ -41,7 +41,7 @@ func TestIncorrectParams(t *testing.T) {
 
 func TestIncorrectFirstParam(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := app.NewParser(logger)
+	Parser := parser.NewParser(logger)
 
 	fn, ok := Map["IncorrectFirstParam"]
 	if !ok {
@@ -56,7 +56,7 @@ func TestIncorrectFirstParam(t *testing.T) {
 
 func TestIncorrectSecondParam(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := app.NewParser(logger)
+	Parser := parser.NewParser(logger)
 
 	fn, ok := Map["IncorrectSecondParam"]
 	if !ok {
@@ -71,7 +71,7 @@ func TestIncorrectSecondParam(t *testing.T) {
 
 func TestIncorrectNoOfParams(t *testing.T) {
 	logger := log.New(os.Stdout, "[gen-doc]: ", log.Flags())
-	Parser := app.NewParser(logger)
+	Parser := parser.NewParser(logger)
 
 	fn, ok := Map["IncorrectNoOfParams"]
 	if !ok {

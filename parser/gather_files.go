@@ -1,4 +1,4 @@
-package app
+package parser
 
 import (
 	"fmt"
@@ -42,21 +42,3 @@ func (p *Parser) ParseDir(dir_name string) ([]string, error) {
 
 	return result, nil
 }
-
-// for _, val := range files {
-// 		if val == nil {
-// 			continue
-// 		}
-// 		if val.IsDir() && !strings.HasPrefix(val.Name(), ".") {
-// 			res, err := p.ParseDir(val.Name())
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 			result = append(result, res...)
-// 		}
-// 		// skips if a folder or any file other than a go file
-// 		if filepath.Ext(val.Name()) != ".go" {
-// 			continue
-// 		}
-// 		result = append(result, strings.Join(, "/")+val.Name())
-// 	}
