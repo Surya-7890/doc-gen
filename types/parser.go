@@ -1,15 +1,9 @@
 package types
 
-type METHOD string
-
-const (
-	POST METHOD = "post"
-	GET  METHOD = "get"
-)
-
-type ParsedFunction struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Path        string `json:"path"`
-	Method      METHOD `json:"method"`
+type Route struct {
+	Name        string                 `json:"name"`
+	Path        string                 `json:"path"`
+	Method      HTTP_METHOD            `json:"method"`
+	Body        map[string]interface{} `json:"body"`
+	Description string                 `json:"description"`
 }

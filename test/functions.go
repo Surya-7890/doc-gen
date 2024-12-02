@@ -1,6 +1,8 @@
 package test
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func IncorrectParams(res string, req int) {}
 
@@ -10,6 +12,6 @@ func IncorrectNoOfParams(res string) {}
 
 func IncorrectSecondParam(res http.ResponseWriter, req string) {}
 
-// @method GET
+// @method POST
 // @path /login
 func RouteHandler(res http.ResponseWriter, req *http.Request) {}
