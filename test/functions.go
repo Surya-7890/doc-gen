@@ -15,3 +15,7 @@ func IncorrectSecondParam(res http.ResponseWriter, req string) {}
 // @method POST
 // @path /login
 func RouteHandler(res http.ResponseWriter, req *http.Request) {}
+
+func dummy() {
+	http.HandleFunc("/", RouteHandler)
+}

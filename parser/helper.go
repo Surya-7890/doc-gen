@@ -1,6 +1,9 @@
 package parser
 
-import "go/ast"
+import (
+	"fmt"
+	"go/ast"
+)
 
 // checks if a function is a route handler
 // reads the params to verify
@@ -37,4 +40,9 @@ func (p *Parser) IsRouteHandler(fn *ast.FuncDecl) bool {
 	default:
 		return false
 	}
+}
+
+func (p *Parser) IsHandlerFunc(fn *ast.FuncDecl) bool {
+	fmt.Println(fn.Name)
+	return true
 }
