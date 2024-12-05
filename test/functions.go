@@ -17,5 +17,7 @@ func IncorrectSecondParam(res http.ResponseWriter, req string) {}
 func RouteHandler(res http.ResponseWriter, req *http.Request) {}
 
 func dummy() {
-	http.HandleFunc("/", RouteHandler)
+	mux := http.NewServeMux()
+	auth := http.NewServeMux()
+	mux.Handle("/", http.StripPrefix("/", auth))
 }

@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"fmt"
 	"go/ast"
 )
 
@@ -19,6 +20,7 @@ func (g *Gen) WaitForFiles() {
 		if len(val) == 0 {
 			continue
 		}
+		fmt.Println(val)
 		for _, v := range val {
 			g.constructRouteInfo(v)
 		}
