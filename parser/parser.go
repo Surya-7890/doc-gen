@@ -16,7 +16,7 @@ func (p *Parser) Parse() {
 	files := p.getAllFiles(dir)
 
 	for _, val := range files {
-		fmt.Println(val.Name())
+		fmt.Println(val)
 	}
 }
 

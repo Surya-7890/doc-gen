@@ -31,13 +31,13 @@ func NewParser(logger *log.Logger) *Parser {
 }
 
 // gets all .go files in the current working directory
-func (p *Parser) getAllFiles(dir_name string) []fs.DirEntry {
+func (p *Parser) getAllFiles(dir_name string) []string {
 	files, err := os.ReadDir(dir_name)
 	if err != nil {
 		p.log.Fatal(err.Error())
 	}
 
-	var arr []fs.DirEntry
+	var arr []string
 
 	for _, entry := range files {
 		if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") {
@@ -46,7 +46,7 @@ func (p *Parser) getAllFiles(dir_name string) []fs.DirEntry {
 		if path.Ext(entry.Name()) != ".go" {
 			continue
 		}
-		arr = append(arr, entry)
+		arr = append(arr, path.Join(dir_name, entry.Name()))
 	}
 
 	return arr
