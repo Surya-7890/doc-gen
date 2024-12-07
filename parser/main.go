@@ -13,20 +13,18 @@ type IParser interface {
 	getAllFiles() []fs.DirEntry
 	Parse()
 	parseSingleFile()
-	findHandlers()
-	findHandlerFuncs()
 }
 
 type Parser struct {
 	IParser
-	log   *log.Logger
-	fnMap map[string]ast.Node
+	log       *log.Logger
+	FilesChan chan *ast.File
 }
 
 func NewParser(logger *log.Logger) *Parser {
 	return &Parser{
-		log:   logger,
-		fnMap: make(map[string]ast.Node),
+		log:       logger,
+		FilesChan: make(chan *ast.File, 10),
 	}
 }
 
