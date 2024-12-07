@@ -2,6 +2,7 @@ package parser
 
 import (
 	"gen-doc/parser/scanner"
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
@@ -15,8 +16,9 @@ func (p *Parser) Parse() {
 
 	scannerWg := &sync.WaitGroup{}
 	Scanner := scanner.Scanner{
-		Log:       p.log,
-		FilesChan: p.FilesChan,
+		Log:         p.log,
+		FilesChan:   p.FilesChan,
+		FuncDeclMap: make(map[string][]*ast.FuncDecl),
 	}
 
 	scannerWg.Add(1)
