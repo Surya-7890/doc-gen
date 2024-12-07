@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"gen-doc/parser/scanner"
 	"go/parser"
 	"go/token"
 	"os"
@@ -11,6 +12,19 @@ import (
 // stores all function declarations in p.FnMap
 func (p *Parser) Parse() {
 	dir, err := os.Getwd()
+
+	scannerWg := &sync.WaitGroup{}
+	Scanner := scanner.Scanner{
+		Log:       p.log,
+		FilesChan: p.FilesChan,
+	}
+
+	scannerWg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		Scanner.WaitForFiles()
+	}(scannerWg)
+
 	if err != nil {
 		p.log.Fatal(err.Error())
 	}
@@ -20,15 +34,18 @@ func (p *Parser) Parse() {
 	wg := &sync.WaitGroup{}
 	for _, file_name := range files {
 		wg.Add(1)
-		go func(wg *sync.WaitGroup) {
-			p.parseSingleFile(file_name, wg)
-		}(wg)
+		go func(file_name string) {
+			defer wg.Done()
+			p.parseSingleFile(file_name)
+		}(file_name)
 	}
 	wg.Wait()
+	close(p.FilesChan)
+	scannerWg.Wait()
 }
 
 // parses single .go file to find all function declarations
-func (p *Parser) parseSingleFile(file_name string, wg *sync.WaitGroup) {
+func (p *Parser) parseSingleFile(file_name string) {
 	file_set := token.NewFileSet()
 	file, err := parser.ParseFile(file_set, file_name, nil, parser.ParseComments)
 	if err != nil {
@@ -37,5 +54,4 @@ func (p *Parser) parseSingleFile(file_name string, wg *sync.WaitGroup) {
 	if file != nil {
 		p.FilesChan <- file
 	}
-	wg.Done()
 }

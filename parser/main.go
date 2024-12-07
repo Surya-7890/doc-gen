@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"gen-doc/parser/scanner"
 	"go/ast"
 	"io/fs"
 	"log"
@@ -23,15 +22,9 @@ type Parser struct {
 }
 
 func NewParser(logger *log.Logger) *Parser {
-	channel := make(chan *ast.File, 10)
-	Scanner := scanner.Scanner{
-		Log:       logger,
-		FilesChan: channel,
-	}
-	go Scanner.WaitForFiles()
 	return &Parser{
 		log:       logger,
-		FilesChan: channel,
+		FilesChan: make(chan *ast.File, 10),
 	}
 }
 
