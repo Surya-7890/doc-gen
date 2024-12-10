@@ -16,30 +16,43 @@ type IScanner interface {
 
 type Scanner struct {
 	IScanner
-	Log       *log.Logger
-	FilesChan chan *ast.File
+	Log         *log.Logger
+	FilesChan   chan *ast.File
+	FuncDeclMap map[string][]*ast.FuncDecl
 }
 
 func (s *Scanner) WaitForFiles() {
 	wg := &sync.WaitGroup{}
-	i := 0
+	mx := &sync.Mutex{}
 	for file := range s.FilesChan {
-		i++
-		if file.Name.Name == "main" {
-			wg.Add(1)
-			go func(file *ast.File) {
-				defer wg.Done()
-				s.traverse(file)
-			}(file)
-		}
+		wg.Add(1)
+		go func(file *ast.File) {
+			defer wg.Done()
+			s.getAllFuncDecls(file, mx)
+		}(file)
 	}
 	wg.Wait()
-	fmt.Println(i)
+
+	for _, fn := range s.FuncDeclMap["main"] {
+		wg.Add(1)
+		go func(fn *ast.FuncDecl) {
+			defer wg.Done()
+			args := s.findHandlers(fn)
+			if len(args) > 0 {
+				slct_stmt, ok := args[1].(*ast.SelectorExpr)
+				if ok {
+					fmt.Println("sel:", slct_stmt.X, " name:", slct_stmt.Sel.Name)
+					return
+				}
+				fmt.Println(args[1])
+			}
+		}(fn)
+	}
+	wg.Wait()
 }
 
-func (s *Scanner) traverse(file *ast.File) {
-	ast.Inspect(file, func(n ast.Node) bool {
-		s.findHandlers(n)
-		return true
-	})
-}
+// func (s *Scanner) traverse(fn *ast.FuncDecl, mx *sync.Mutex) {
+// 	ast.Inspect(fn, func(n ast.Node) bool {
+// 		return true
+// 	})
+// }
