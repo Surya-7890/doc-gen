@@ -41,7 +41,7 @@ func (s *Scanner) WaitForFiles() {
 			if len(args) > 0 {
 				slct_stmt, ok := args[1].(*ast.SelectorExpr)
 				if ok {
-					fmt.Println(slct_stmt.X, slct_stmt.Sel.Name)
+					fmt.Println("sel:", slct_stmt.X, " name:", slct_stmt.Sel.Name)
 					return
 				}
 				fmt.Println(args[1])
