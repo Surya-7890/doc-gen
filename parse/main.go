@@ -4,6 +4,7 @@ import (
 	"gen-doc/parse/parser"
 	"gen-doc/parse/scanner"
 	"log"
+	"sync"
 )
 
 func Parse() {
@@ -12,7 +13,14 @@ func Parse() {
 	Parser := parser.NewParser(logger, channel)
 	Scanner := scanner.NewScanner(logger, channel)
 
-	go Parser.WaitForFiles()
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		Parser.WaitForFiles()
+	}(wg)
 
 	Scanner.GetAllFiles()
+
+	wg.Wait()
 }

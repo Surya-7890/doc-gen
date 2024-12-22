@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"fmt"
+	"gen-doc/types"
 	"go/ast"
 	"os"
 	"path"
@@ -20,8 +21,11 @@ func (s *Scanner) GetAllFiles() []*ast.File {
 	filenames := s.getFilesFromDir(dir)
 
 	for _, filename := range filenames {
-		fmt.Println(filename)
+		s.filenames <- filename
+		fmt.Println("sent:", filename)
 	}
+
+	s.filenames <- types.CHANNEL_CLOSE
 
 	return files
 }
@@ -41,7 +45,7 @@ func (s *Scanner) getFilesFromDir(dir_name string) []string {
 		}
 
 		if filepath.Ext(entry.Name()) == ".go" {
-			filenames = append(filenames, entry.Name())
+			filenames = append(filenames, path.Join(dir_name, entry.Name()))
 		}
 	}
 
