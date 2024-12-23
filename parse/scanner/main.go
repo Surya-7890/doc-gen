@@ -8,13 +8,11 @@ type IScanner interface {
 
 type Scanner struct {
 	IScanner
-	log       *log.Logger
-	filenames chan string
+	log *log.Logger
 }
 
-func NewScanner(logger *log.Logger, channel chan string) *Scanner {
+func NewScanner(logger *log.Logger) *Scanner {
 	return &Scanner{
-		log:       logger,
-		filenames: channel,
+		log: logger,
 	}
 }

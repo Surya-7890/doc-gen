@@ -1,53 +1,31 @@
 package scanner
 
 import (
-	"fmt"
-	"gen-doc/types"
-	"go/ast"
 	"os"
-	"path"
-	"path/filepath"
+
+	"golang.org/x/tools/go/packages"
 )
 
-func (s *Scanner) GetAllFiles() []*ast.File {
-	files := []*ast.File{}
+func (s *Scanner) GetAllFiles() map[string][]string {
+	files := make(map[string][]string)
 
 	dir, err := os.Getwd()
 	if err != nil {
 		s.log.Fatal(err.Error())
 	}
 
-	dir = dir + "/example"
-	filenames := s.getFilesFromDir(dir)
-
-	for _, filename := range filenames {
-		s.filenames <- filename
-		fmt.Println("sent:", filename)
+	cfg := &packages.Config{
+		Mode: packages.NeedName | packages.NeedFiles,
 	}
 
-	s.filenames <- types.CHANNEL_CLOSE
-
-	return files
-}
-
-func (s *Scanner) getFilesFromDir(dir_name string) []string {
-	filenames := []string{}
-	entries, err := os.ReadDir(dir_name)
+	pkgs, err := packages.Load(cfg, dir+"/example/...")
 	if err != nil {
 		s.log.Fatal(err.Error())
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() {
-			res := s.getFilesFromDir(path.Join(dir_name, entry.Name()))
-			filenames = append(filenames, res...)
-			continue
-		}
-
-		if filepath.Ext(entry.Name()) == ".go" {
-			filenames = append(filenames, path.Join(dir_name, entry.Name()))
-		}
+	for _, pkg := range pkgs {
+		files[pkg.Name] = append(files[pkg.Name], pkg.GoFiles...)
 	}
 
-	return filenames
+	return files
 }

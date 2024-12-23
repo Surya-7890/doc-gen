@@ -1,4 +1,4 @@
-package user
+package controllers
 
 import (
 	"gen-doc/example/db"

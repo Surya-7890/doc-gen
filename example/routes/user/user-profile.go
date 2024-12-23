@@ -1,7 +1,7 @@
-package user
+package routes
 
 import (
-	"gen-doc/example/controllers/user"
+	controllers "gen-doc/example/controllers/user"
 	"gen-doc/example/db"
 	"net/http"
 )
@@ -18,7 +18,7 @@ func NewUserProfileRoute(db *db.DB) *UserProfileRoute {
 
 func setupUserProfileHandler(db *db.DB) *http.ServeMux {
 	mux := http.NewServeMux()
-	user_profile_controller := user.NewUserProfileController(db)
+	user_profile_controller := controllers.NewUserProfileController(db)
 
 	mux.HandleFunc("GET /", user_profile_controller.GetMethod)
 	mux.HandleFunc("POST /", user_profile_controller.PostMethod)

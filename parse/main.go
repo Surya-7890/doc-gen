@@ -4,23 +4,14 @@ import (
 	"gen-doc/parse/parser"
 	"gen-doc/parse/scanner"
 	"log"
-	"sync"
 )
 
 func Parse() {
 	logger := log.Default()
-	channel := make(chan string, 10)
-	Parser := parser.NewParser(logger, channel)
-	Scanner := scanner.NewScanner(logger, channel)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func(wg *sync.WaitGroup) {
-		defer wg.Done()
-		Parser.WaitForFiles()
-	}(wg)
+	Parser := parser.NewParser(logger)
+	Scanner := scanner.NewScanner(logger)
 
-	Scanner.GetAllFiles()
-
-	wg.Wait()
+	files_map := Scanner.GetAllFiles()
+	Parser.ParsePackages(files_map)
 }

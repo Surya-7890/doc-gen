@@ -3,7 +3,7 @@ package main
 import (
 	"gen-doc/example/db"
 	"gen-doc/example/routes"
-	"gen-doc/example/routes/user"
+	user "gen-doc/example/routes/user"
 	"net/http"
 )
 
