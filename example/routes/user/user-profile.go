@@ -20,10 +20,10 @@ func setupUserProfileHandler(db *db.DB) *http.ServeMux {
 	mux := http.NewServeMux()
 	user_profile_controller := controllers.NewUserProfileController(db)
 
-	mux.HandleFunc("GET /", user_profile_controller.GetMethod)
-	mux.HandleFunc("POST /", user_profile_controller.PostMethod)
-	mux.HandleFunc("PATCH /", user_profile_controller.PatchMethod)
-	mux.HandleFunc("DELETE /", user_profile_controller.DeleteMethod)
+	mux.HandleFunc("GET /getprofile", user_profile_controller.GetMethod)
+	mux.HandleFunc("POST /createprofile", user_profile_controller.PostMethod)
+	mux.HandleFunc("PATCH /updateprofile", user_profile_controller.PatchMethod)
+	mux.HandleFunc("DELETE /deleteprofile", user_profile_controller.DeleteMethod)
 
 	return mux
 }

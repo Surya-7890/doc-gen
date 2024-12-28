@@ -2,18 +2,10 @@ package parser
 
 import (
 	"go/ast"
-	"go/parser"
-	"go/token"
 )
 
-func (p *Parser) parseSingleFile(filaname string, fileSet *token.FileSet, mode parser.Mode) ([]*ast.FuncDecl, []*ast.CallExpr) {
+func (p *Parser) parseSingleFile(file *ast.File) []*ast.FuncDecl {
 	fn := []*ast.FuncDecl{}
-	call := []*ast.CallExpr{}
-
-	file, err := parser.ParseFile(fileSet, filaname, nil, mode)
-	if err != nil {
-		p.log.Fatal(err.Error())
-	}
 
 	ast.Inspect(file, func(n ast.Node) bool {
 
@@ -23,16 +15,8 @@ func (p *Parser) parseSingleFile(filaname string, fileSet *token.FileSet, mode p
 			return true
 		}
 
-		call_expr, ok := n.(*ast.CallExpr)
-		if ok {
-			// have to check if it is a builtin function
-			// or it is from the std library
-			call = append(call, call_expr)
-			return true
-		}
-
 		return true
 	})
 
-	return fn, call
+	return fn
 }

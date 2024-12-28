@@ -32,8 +32,8 @@ func setupApplication() *http.ServeMux {
 	user := user.NewUserRoute(db)
 	product := routes.NewProductRoute(db)
 
-	mux.Handle("/", http.StripPrefix("/product", product.Handler))
-	mux.Handle("/", http.StripPrefix("/user", user.Handler))
+	mux.Handle("/product", http.StripPrefix("/product", product.Handler))
+	mux.Handle("/user", http.StripPrefix("/user", user.Handler))
 
 	return mux
 }
