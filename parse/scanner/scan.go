@@ -1,13 +1,14 @@
 package scanner
 
 import (
+	"gen-doc/types"
 	"os"
 
 	"golang.org/x/tools/go/packages"
 )
 
-func (s *Scanner) GetAllFiles() map[string][]string {
-	files := make(map[string][]string)
+func (s *Scanner) GetAllFiles() map[*types.MapKey]*packages.Package {
+	files := make(map[*types.MapKey]*packages.Package)
 
 	dir, err := os.Getwd()
 	if err != nil {
@@ -15,16 +16,20 @@ func (s *Scanner) GetAllFiles() map[string][]string {
 	}
 
 	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles,
+		Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax | packages.NeedTypes | packages.NeedTypesInfo,
 	}
 
-	pkgs, err := packages.Load(cfg, dir+"/example/...")
+	pkgs, err := packages.Load(cfg, dir+s.dir_name+"/...")
 	if err != nil {
 		s.log.Fatal(err.Error())
 	}
 
 	for _, pkg := range pkgs {
-		files[pkg.Name] = append(files[pkg.Name], pkg.GoFiles...)
+		name := &types.MapKey{
+			Name: pkg.Name,
+			Path: pkg.PkgPath,
+		}
+		files[name] = pkg
 	}
 
 	return files

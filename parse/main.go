@@ -9,8 +9,8 @@ import (
 func Parse() {
 	logger := log.Default()
 
-	Parser := parser.NewParser(logger)
-	Scanner := scanner.NewScanner(logger)
+	Parser := parser.NewParser(logger, "/example")
+	Scanner := scanner.NewScanner(logger, "/example")
 
 	files_map := Scanner.GetAllFiles()
 	Parser.ParsePackages(files_map)

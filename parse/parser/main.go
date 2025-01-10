@@ -1,49 +1,58 @@
 package parser
 
 import (
+	"gen-doc/types"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"log"
 	"sync"
+
+	"golang.org/x/tools/go/packages"
 )
 
 type Parser struct {
 	log           *log.Logger
-	fn_decls      map[string][]*ast.FuncDecl
-	handler_funcs map[string][]*ast.FuncDecl
+	fn_decls      map[*types.MapKey][]*ast.FuncDecl
+	handler_funcs map[*types.MapKey][]*ast.FuncDecl
+	pkg_map       map[*types.MapKey]*packages.Package
+	pkg_keys      []*types.MapKey
+	dir_name      string
 }
 
-func NewParser(logger *log.Logger) *Parser {
+func NewParser(logger *log.Logger, dir_name string) *Parser {
 	return &Parser{
 		log:           logger,
-		fn_decls:      make(map[string][]*ast.FuncDecl),
-		handler_funcs: make(map[string][]*ast.FuncDecl),
+		dir_name:      dir_name,
+		fn_decls:      make(map[*types.MapKey][]*ast.FuncDecl),
+		handler_funcs: make(map[*types.MapKey][]*ast.FuncDecl),
 	}
 }
 
-func (p *Parser) ParsePackages(files_map map[string][]string) {
+func (p *Parser) ParsePackages(files_map map[*types.MapKey]*packages.Package) {
 	wg := &sync.WaitGroup{}
 	mx := &sync.Mutex{}
 	mode := parser.AllErrors | parser.ParseComments
+
+	p.pkg_map = files_map
+	keys := []*types.MapKey{}
+	for k := range p.pkg_map {
+		keys = append(keys, k)
+	}
+	p.pkg_keys = keys
 
 	for k, v := range files_map {
 
 		fileSet := token.NewFileSet()
 
 		// maps [package_name] -> []FuncDecls (function declarations in the package)
-		decl_arr := []*ast.FuncDecl{}
-		p.fn_decls[k] = decl_arr
+		p.fn_decls[k] = []*ast.FuncDecl{}
 
-		files := []*ast.File{}
-
-		for _, file := range v {
+		for _, file := range v.GoFiles {
 			ast_file, err := parser.ParseFile(fileSet, file, nil, mode)
 			if err != nil {
 				p.log.Fatal(err.Error())
 			}
-
-			files = append(files, ast_file)
 
 			wg.Add(1)
 			go func(wg *sync.WaitGroup, mx *sync.Mutex) {
@@ -63,6 +72,5 @@ func (p *Parser) ParsePackages(files_map map[string][]string) {
 	// other funcs and ancestral tree must be constructed
 	p.filterHandlerFuncs()
 
-	// todo ~ to generate the ancestral tree of handler_funcs
-	p.traverse()
+	p.extractDocs()
 }
