@@ -15,18 +15,22 @@ func NewProductController(db *db.DB) *ProductController {
 	}
 }
 
+// @GET /product
 func (a *ProductController) GetMethod(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @POST /product
 func (a *ProductController) PostMethod(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @PATCH /product
 func (a *ProductController) PatchMethod(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @DELETE /product
 func (a *ProductController) DeleteMethod(w http.ResponseWriter, r *http.Request) {
 
 }

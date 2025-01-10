@@ -41,7 +41,9 @@ func (p *Parser) filterHandlerFuncs() {
 
 		// contains only handler funcs
 		// maps [package_name] -> []HandlerFuncs (handler functions in the package)
-		p.handler_funcs[k] = filtered
+		if len(filtered) > 0 {
+			p.handler_funcs[k] = filtered
+		}
 	}
 
 }
