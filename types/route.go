@@ -21,6 +21,11 @@ const (
 	OPTIONS REQUEST_TYPE = "@options"
 )
 
+const (
+	PARSE_REQUEST = iota
+	PARSE_RESPONSE
+)
+
 type RouteInfo struct {
 	RequestParsingRequired bool
 	Route                  string   `json:"path"`

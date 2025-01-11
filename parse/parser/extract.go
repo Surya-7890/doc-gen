@@ -1,8 +1,10 @@
 package parser
 
 import (
+	"fmt"
 	"gen-doc/types"
 	"gen-doc/utils"
+	"go/ast"
 	"strings"
 )
 
@@ -39,14 +41,37 @@ func (p *Parser) extractDocs() {
 			}
 
 			if res.RequestParsingRequired {
-				p.parseRequestBody(res)
+				p.parseStruct(fn, types.PARSE_REQUEST)
 			}
 
-			p.parseResponseBody(res)
+			p.parseStruct(fn, types.PARSE_RESPONSE)
 		}
 	}
 }
 
-func (p *Parser) parseRequestBody(res *types.RouteInfo) {}
+func (p *Parser) parseStruct(fn *ast.FuncDecl, target int) {
+	if target == types.PARSE_REQUEST {
 
-func (p *Parser) parseResponseBody(res *types.RouteInfo) {}
+	} else if target == types.PARSE_RESPONSE {
+
+	}
+
+	for _, stmt := range fn.Body.List {
+		expr, ok := stmt.(*ast.ExprStmt)
+		if !ok {
+			continue
+		}
+
+		sl, ok := expr.X.(*ast.SelectorExpr)
+		if !ok {
+			continue
+		}
+
+		id, ok := sl.X.(*ast.Ident)
+		if !ok {
+			continue
+		}
+
+		fmt.Println(sl.Sel.Name, id.Name)
+	}
+}
