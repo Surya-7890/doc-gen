@@ -4,14 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"gen-doc/types"
+	"strings"
 )
 
-func ExtractDocFromText(doc types.ROUTE_INFO, res *types.ExtractRouteInfo) {
+func ExtractDocFromText(doc types.ROUTE_INFO, res *types.RouteInfo) {
 
 	res.RequestParsingRequired = true
 
 	req_type, ok := doc.Identifier.(types.REQUEST_TYPE)
 	if ok {
+		res.Method = strings.TrimPrefix(req_type.ToString(), "@")
 		if req_type == types.GET || req_type == types.OPTIONS {
 			res.RequestParsingRequired = false
 		}

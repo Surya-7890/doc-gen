@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"gen-doc/types"
 	"gen-doc/utils"
 	"strings"
@@ -13,7 +12,7 @@ func (p *Parser) extractDocs() {
 	for pkgname, fns := range p.handler_funcs {
 		p.log.Println(pkgname)
 		for _, fn := range fns {
-			res := &types.ExtractRouteInfo{}
+			res := &types.RouteInfo{}
 
 			for _, doc := range fn.Doc.List {
 				doc.Text = strings.TrimPrefix(doc.Text, "//")
@@ -39,7 +38,15 @@ func (p *Parser) extractDocs() {
 				}, res)
 			}
 
-			fmt.Println(res)
+			if res.RequestParsingRequired {
+				p.parseRequestBody(res)
+			}
+
+			p.parseResponseBody(res)
 		}
 	}
 }
+
+func (p *Parser) parseRequestBody(res *types.RouteInfo) {}
+
+func (p *Parser) parseResponseBody(res *types.RouteInfo) {}

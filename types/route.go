@@ -21,11 +21,12 @@ const (
 	OPTIONS REQUEST_TYPE = "@options"
 )
 
-type ExtractRouteInfo struct {
+type RouteInfo struct {
 	RequestParsingRequired bool
-	Route                  string
-	PathParams             []string
-	Description            string
+	Route                  string   `json:"path"`
+	PathParams             []string `json:"params"`
+	Description            string   `json:"description"`
+	Method                 string   `json:"method"`
 }
 
 func (r REQUEST_TYPE) ToString() string {
