@@ -16,6 +16,7 @@ func NewProductController(db *db.DB) *ProductController {
 }
 
 // @GET /product
+// @desc get product list
 func (a *ProductController) GetMethod(w http.ResponseWriter, r *http.Request) {
 
 }

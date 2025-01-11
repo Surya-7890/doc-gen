@@ -15,7 +15,7 @@ func NewUserController(db *db.DB) *UserController {
 	}
 }
 
-// @GET /user
+// @GET /user/{id}
 func (a *UserController) GetMethod(w http.ResponseWriter, r *http.Request) {
 
 }
