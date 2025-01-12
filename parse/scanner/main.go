@@ -8,11 +8,13 @@ type IScanner interface {
 
 type Scanner struct {
 	IScanner
-	log *log.Logger
+	log      *log.Logger
+	dir_name string
 }
 
-func NewScanner(logger *log.Logger) *Scanner {
+func NewScanner(logger *log.Logger, dir_name string) *Scanner {
 	return &Scanner{
-		log: logger,
+		log:      logger,
+		dir_name: dir_name,
 	}
 }
