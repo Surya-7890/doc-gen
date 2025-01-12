@@ -57,18 +57,72 @@ func (p *Parser) parseStruct(fn *ast.FuncDecl, target int) {
 	}
 
 	for _, stmt := range fn.Body.List {
+		var expression ast.Expr
 		expr, ok := stmt.(*ast.ExprStmt)
 		if !ok {
-			continue
+			assign, ok := stmt.(*ast.AssignStmt)
+			if !ok || (assign != nil && len(assign.Rhs) != 1) {
+				continue
+			}
+			expression = assign.Rhs[0]
 		}
 
-		sl, ok := expr.X.(*ast.SelectorExpr)
+		/*
+			the request body parsing can be done in many ways
+			1) {
+				decoder := json.NewDecoder(r.Body)
+				decoder.Decode(req)
+
+				and similarly for response
+			}
+
+			2) {
+				json.NewDecoder(r.Body).Decode(req)
+			}
+
+			3) {
+				body, err := io.ReadAll(r.Body)
+
+				err := json.Unmarshal(body, req)
+
+				for response writing,
+				data, err := json.Marshal(res)
+			}
+		*/
+		var call *ast.CallExpr
+
+		if expression != nil {
+			call, ok = expression.(*ast.CallExpr)
+			if !ok {
+				continue
+			}
+		} else {
+			call, ok = expr.X.(*ast.CallExpr)
+			if !ok {
+				continue
+			}
+		}
+
+		sl, ok := call.Fun.(*ast.SelectorExpr)
 		if !ok {
 			continue
 		}
 
 		id, ok := sl.X.(*ast.Ident)
 		if !ok {
+			call, ok := sl.X.(*ast.CallExpr)
+			if ok {
+				sl2, ok := call.Fun.(*ast.SelectorExpr)
+				if !ok {
+					continue
+				}
+				id, ok := sl2.X.(*ast.Ident)
+				if !ok {
+					continue
+				}
+
+				fmt.Println(sl.Sel.Name, sl2.Sel.Name, id.Name)
+			}
 			continue
 		}
 
